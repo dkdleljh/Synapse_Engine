@@ -1,0 +1,73 @@
+observation_summary:
+  relations:
+    - 실험 설계의 인과 추정 안정성 검증
+  bounds:
+    energy_input: [0.0, 20.0]
+    entropy_delta_total: [0.0, 15.0]
+    info_record_bits: [0.0, 10.0]
+  uncertainties:
+    drift:
+      type: gaussian
+      mean: 1.2
+      std: 0.4
+    sensor_bias:
+      type: bounded
+      mean: 0.1
+      std: 0.05
+goal_function:
+  primary: minimize_risk
+  secondary:
+    - maximize_information_gain
+domain_policy:
+  no_causal_loop: true
+  entropy_non_decrease: true
+  local_conservation: true
+  external_output_zero: true
+  sensitivity_threshold: 0.7
+  bounded_information_operations: true
+candidate_scenarios:
+  - id: policy_case_1
+    events:
+      - id: R1
+        type: GATE
+        delta_e: [1.0, 1.8]
+        delta_s: [0.2, 0.4]
+        delta_i: [0.1, 0.3]
+        cone: regional
+        preconditions: []
+        postconditions: ["policy_active"]
+        metadata:
+          role: policy_engine
+      - id: R2
+        type: MEASURE
+        delta_e: [0.0, 0.2]
+        delta_s: [0.0, 0.1]
+        delta_i: [0.2, 0.7]
+        cone: regional
+        preconditions: ["R1"]
+        postconditions: ["measurement"]
+        metadata:
+          role: sensor_layer
+      - id: R3
+        type: Filter
+        delta_e: [0.0, 0.1]
+        delta_s: [0.0, 0.2]
+        delta_i: [0.0, 0.1]
+        cone: local
+        preconditions: ["R2"]
+        postconditions: ["signal_clean"]
+        metadata:
+          role: filter
+    edges:
+      - source: R1
+        target: R2
+        lag: [0.0, 0.1]
+        relation_type: causes
+        confidence: 0.9
+        justification: 정책 게이트는 측정의 선행 조건
+      - source: R2
+        target: R3
+        lag: [0.0, 0.2]
+        relation_type: causes
+        confidence: 0.87
+        justification: 측정값은 필터링 단계로 전달됨

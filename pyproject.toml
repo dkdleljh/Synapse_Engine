@@ -1,0 +1,33 @@
+[project]
+name = "synapse-engine"
+version = "0.1.0"
+description = "물리-준수형 시나리오 검증 및 문서 생성 엔진"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "typer>=0.12",
+  "pydantic>=2.8",
+  "networkx>=3.3",
+  "z3-solver>=4.14",
+  "pyyaml>=6.0.1",
+  "jinja2>=3.1",
+  "rich>=13.7",
+  "numpy>=1.26",
+  "matplotlib>=3.8",
+  "pytest>=8.2",
+]
+
+[project.scripts]
+synapse_engine = "synapse_engine.main:app"
+
+[project.urls]
+homepage = "https://example.com/synapse_engine"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q"
+testpaths = ["tests"]

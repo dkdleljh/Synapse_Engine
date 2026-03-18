@@ -1,0 +1,63 @@
+observation_summary:
+  relations:
+    - 대응 체계의 누락/지연을 인과 분석
+  bounds:
+    energy_input: [0.0, 16.0]
+    entropy_delta_total: [0.0, 12.0]
+    info_record_bits: [0.0, 8.0]
+  uncertainties:
+    alert_delay:
+      type: gaussian
+      mean: 2.0
+      std: 0.9
+goal_function:
+  primary: minimize_risk
+  secondary:
+    - maximize_information_gain
+domain_policy:
+  no_causal_loop: true
+  entropy_non_decrease: true
+  local_conservation: true
+  external_output_zero: true
+  sensitivity_threshold: 0.9
+  bounded_information_operations: true
+candidate_scenarios:
+  - id: disaster_case
+    events:
+      - id: D1
+        type: MEASURE
+        delta_e: [0.1, 0.2]
+        delta_s: [0.1, 0.2]
+        delta_i: [0.4, 0.8]
+        cone: local
+        preconditions: []
+        postconditions: ["alert"]
+      - id: D2
+        type: MATERIAL_RECONFIGURATION
+        delta_e: [1.0, 1.6]
+        delta_s: [0.2, 0.4]
+        delta_i: [0.2, 0.5]
+        cone: regional
+        preconditions: ["D1"]
+        postconditions: ["isolate_zone"]
+      - id: D3
+        type: SEAL
+        delta_e: [0.0, 0.4]
+        delta_s: [0.1, 0.3]
+        delta_i: [0.1, 0.3]
+        cone: regional
+        preconditions: ["D2"]
+        postconditions: ["zone_secure"]
+    edges:
+      - source: D1
+        target: D2
+        lag: [0.0, 0.4]
+        relation_type: causes
+        confidence: 0.91
+        justification: 탐지가 재구성의 선행 조건
+      - source: D2
+        target: D3
+        lag: [0.0, 0.3]
+        relation_type: causes
+        confidence: 0.95
+        justification: 격리는 봉쇄 단계로 이어짐

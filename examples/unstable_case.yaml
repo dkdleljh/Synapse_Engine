@@ -1,0 +1,48 @@
+observation_summary:
+  relations:
+    - 정책 위반 및 루프를 검증하기 위한 실패 예시
+  bounds:
+    energy_input: [0.0, 4.0]
+    entropy_delta_total: [0.0, 1.0]
+    info_record_bits: [0.0, 1.0]
+  uncertainties:
+    calibration:
+      type: gaussian
+      mean: 1.0
+      std: 2.0
+goal_function:
+  primary: minimize_risk
+  secondary: []
+domain_policy:
+  no_causal_loop: true
+  entropy_non_decrease: true
+  local_conservation: true
+  external_output_zero: true
+  sensitivity_threshold: 0.2
+  bounded_information_operations: true
+candidate_scenarios:
+  - id: unstable_case
+    events:
+      - id: U1
+        type: EnergyInjection
+        delta_e: [5.0, 6.0]
+        delta_s: [0.1, 0.2]
+        delta_i: [0.2, 0.3]
+        cone: local
+        preconditions: []
+        postconditions: ["overload"]
+      - id: U2
+        type: UnknownType
+        delta_e: [0.0, 0.1]
+        delta_s: [0.2, 0.4]
+        delta_i: [0.0, 0.1]
+        cone: global
+        preconditions: ["U1"]
+        postconditions: ["broken_state"]
+    edges:
+      - source: U1
+        target: U2
+        lag: [0.0, 0.1]
+        relation_type: causes
+        confidence: 0.99
+        justification: 실패 시나리오 시작 간선

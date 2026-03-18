@@ -1,0 +1,53 @@
+observation_summary:
+  relations:
+    - Energy injection 후 열역학 변화 관측
+  bounds:
+    energy_input: [0.0, 12.0]
+    entropy_delta_total: [0.0, 8.0]
+    info_record_bits: [0.0, 6.0]
+  uncertainties:
+    sensor:
+      type: gaussian
+      mean: 1.0
+      std: 0.08
+goal_function:
+  primary: maximize_information_gain
+  secondary:
+    - minimize_risk
+domain_policy:
+  no_causal_loop: true
+  entropy_non_decrease: true
+  local_conservation: true
+  external_output_zero: true
+  sensitivity_threshold: 0.8
+  bounded_information_operations: true
+candidate_scenarios:
+  - id: basic_scenario
+    events:
+      - id: E1
+        type: EnergyInjection
+        delta_e: [2.0, 2.5]
+        delta_s: [0.2, 0.5]
+        delta_i: [0.1, 0.4]
+        cone: local
+        preconditions: []
+        postconditions: ["heat"]
+        metadata:
+          actor: reactor
+      - id: E2
+        type: Record
+        delta_e: [0.0, 0.1]
+        delta_s: [0.1, 0.2]
+        delta_i: [0.2, 0.5]
+        cone: regional
+        preconditions: ["E1"]
+        postconditions: ["log"]
+        metadata:
+          actor: recorder
+    edges:
+      - source: E1
+        target: E2
+        lag: [0.0, 0.2]
+        relation_type: causes
+        confidence: 0.95
+        justification: 기본 패치의 입력-기록 경로

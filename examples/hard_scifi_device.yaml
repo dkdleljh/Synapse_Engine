@@ -1,0 +1,69 @@
+observation_summary:
+  relations:
+    - 장거리 장치 동기화 기반 반응 연쇄
+  bounds:
+    energy_input: [0.0, 18.0]
+    entropy_delta_total: [0.0, 12.0]
+    info_record_bits: [0.0, 9.0]
+  uncertainties:
+    phase_jitter:
+      type: gaussian
+      mean: 1.0
+      std: 0.2
+goal_function:
+  primary: maximize_information_gain
+  secondary:
+    - minimize_risk
+domain_policy:
+  no_causal_loop: true
+  entropy_non_decrease: true
+  local_conservation: true
+  external_output_zero: true
+  sensitivity_threshold: 0.6
+  bounded_information_operations: true
+candidate_scenarios:
+  - id: scifi_case
+    events:
+      - id: S1
+        type: SIGNAL_TRANSMIT
+        delta_e: [1.5, 2.0]
+        delta_s: [0.1, 0.3]
+        delta_i: [0.3, 0.6]
+        cone: regional
+        preconditions: []
+        postconditions: ["beam_on"]
+        metadata:
+          source: relay
+      - id: S2
+        type: FEEDBACK
+        delta_e: [0.3, 0.6]
+        delta_s: [0.1, 0.4]
+        delta_i: [0.2, 0.4]
+        cone: global
+        preconditions: ["S1"]
+        postconditions: ["phase_lock"]
+        metadata:
+          source: controller
+      - id: S3
+        type: MATERIAL_RECONFIGURATION
+        delta_e: [0.2, 0.9]
+        delta_s: [0.2, 0.7]
+        delta_i: [0.1, 0.3]
+        cone: regional
+        preconditions: ["S2"]
+        postconditions: ["stabilize"]
+        metadata:
+          source: hull
+    edges:
+      - source: S1
+        target: S2
+        lag: [0.0, 0.3]
+        relation_type: causes
+        confidence: 0.88
+        justification: 송신은 피드백의 선행 조건
+      - source: S2
+        target: S3
+        lag: [0.2, 0.5]
+        relation_type: causes
+        confidence: 0.8
+        justification: 피드백 수신 후 재구성 트리거
